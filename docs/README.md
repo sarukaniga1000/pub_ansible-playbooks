@@ -39,8 +39,8 @@ OSインストール後に各ホストの役割に応じて、`k8s_master.yml`,`
     | os_address_ipv4 | 各ホストのIPアドレス |
     | os_hostname | 各ホストのホスト名 |
 
-# その他
-環境に応じたPV,PVC の設定が事前に必要
+# その他(参考)
+環境に応じたPV,PVC の設定が追加で必要
 - AWX 構築
     - playbook: [awx.yml](../awx.yml)
 - Gitea 構築
