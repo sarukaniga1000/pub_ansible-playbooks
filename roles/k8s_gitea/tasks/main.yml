@@ -1,0 +1,6 @@
+---
+- name: Install gitea via helm.
+  ansible.builtin.import_tasks: gitea.yml
+  tags:
+    - main
+    - install_gitea

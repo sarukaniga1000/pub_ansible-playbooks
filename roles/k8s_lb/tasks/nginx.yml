@@ -1,0 +1,22 @@
+---
+- name: Install nginx.
+  ansible.builtin.apt:
+    name: nginx
+    update_cache: false
+  become: true
+
+- name: Check start and enabled nginx.serice.
+  ansible.builtin.systemd:
+    name: nginx.service
+    status: started
+    daemon_reload: true
+    enabled: true
+  become: true
+
+- name: Copy nginx conf.
+  ansible.builtin.template:
+    src: etc/nginx/nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+    mode: '0644'
+  notify: Restart nginx.service.
+  become: true

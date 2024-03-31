@@ -1,0 +1,15 @@
+---
+- name: Restart nginx.serice.
+  ansible.builtin.systemd:
+    name: nginx.service
+    status: restarted
+    daemon_reload: true
+    enabled: true
+  become: true
+
+- name: Reload nftables.service.
+  ansible.builtin.systemd:
+    name: nftables.service
+    state: reload
+    daemon_reload: true
+  become: true

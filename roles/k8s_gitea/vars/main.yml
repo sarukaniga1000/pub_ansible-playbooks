@@ -1,0 +1,4 @@
+---
+gitea_version: 10.1.3
+
+gitea_fqdn: 'gitea.test.local'

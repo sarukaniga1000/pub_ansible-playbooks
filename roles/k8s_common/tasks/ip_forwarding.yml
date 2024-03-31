@@ -1,0 +1,35 @@
+# https://kubernetes.io/docs/setup/production-environment/container-runtimes/#containerd
+- name: Copy modules setting needed containerd.
+  ansible.builtin.copy:
+    src: etc/modules-load.d/k8s.conf
+    dest: /etc/modules-load.d/k8s.conf
+    mode: '0644'
+  become: true
+
+- name: Add modules ('overlay','br_netfilter').
+  community.general.modprobe:
+    name: "{{ item }}"
+    state: present
+  become: true
+  loop:
+    - overlay
+    - br_netfilter
+
+- name: Update sysctl.
+  ansible.posix.sysctl:
+    name: "{{ item.key }}"
+    value: "{{ item.value }}"
+    state: present
+    sysctl_set: false
+    reload: true
+    sysctl_file: /etc/sysctl.d/99-kubernetes-cri.conf
+  become: true
+  loop:
+    - key: net.bridge.bridge-nf-call-iptables
+      value: 1
+    - key: net.bridge.bridge-nf-call-ip6tables
+      value: 1
+    - key: net.ipv4.ip_forward
+      value: 1
+  loop_control:
+    label: "{{ item.key }} = {{ item.value }}"

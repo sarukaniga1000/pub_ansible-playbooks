@@ -1,0 +1,3 @@
+---
+os_address_ipv4: 192.168.100.100
+os_hostname: 'k8s-lb01'

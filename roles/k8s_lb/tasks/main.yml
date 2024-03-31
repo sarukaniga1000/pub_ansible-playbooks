@@ -1,0 +1,4 @@
+---
+- name: Install nginx and setup k8s load balancer.
+  ansible.builtin.import_tasks: nginx.yml
+  tags: nginx

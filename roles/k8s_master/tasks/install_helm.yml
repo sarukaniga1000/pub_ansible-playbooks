@@ -1,0 +1,61 @@
+---
+- name: Create gpg_keys directory if it does not exist.
+  ansible.builtin.file:
+    path: /usr/local/src/gpg_keys
+    state: directory
+    mode: '0755'
+  become: true
+
+# https://helm.sh/ja/docs/intro/install/
+- name: Download helm's gpg key.
+  register: get_helm_gpg_key
+  ansible.builtin.get_url:
+    url: https://baltocdn.com/helm/signing.asc
+    dest: /usr/local/src/gpg_keys/helm_signing.asc
+    force: true
+    mode: '0644'
+  become: true
+
+- name: Create keyrings directory if it does not exist.
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+  become: true
+
+- name: Check stat helm.gpg
+  register: stat_helm_gpg
+  ansible.builtin.stat:
+    path: /etc/apt/keyrings/helm.gpg
+
+- name: Encode from helm asc to binary.
+  ansible.builtin.command:
+    cmd: gpg -o /etc/apt/keyrings/helm.gpg --dearmor /usr/local/src/gpg_keys/helm_signing.asc
+  become: true
+  when: not stat_helm_gpg.stat.exists and get_helm_gpg_key.changed
+
+- name: Check architecture.
+  register: check_arch
+  ansible.builtin.command:
+    cmd: dpkg --print-architecture
+  changed_when: false
+  check_mode: false
+
+- name: Add repository for helm.
+  ansible.builtin.apt_repository:
+    repo: "deb [arch={{ check_arch.stdout }} signed-by=/etc/apt/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main"
+    filename: helm-stable-debian
+    update_cache: true
+    state: present
+  become: true
+
+- name: Install helm.
+  ansible.builtin.apt:
+    name: helm
+    update_cache: false
+  become: true
+
+- name: Install Helm diff plugin
+  kubernetes.core.helm_plugin:
+    plugin_path: https://github.com/databus23/helm-diff
+    state: present

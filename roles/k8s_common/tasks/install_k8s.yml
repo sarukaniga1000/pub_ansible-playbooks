@@ -1,0 +1,77 @@
+---
+- name: Install necessary packages if they don't exist.
+  ansible.builtin.apt:
+    name:
+      - curl
+      - ca-certificates
+      - apt-transport-https
+    update_cache: false
+  become: true
+
+- name: Create gpg_keys directory if it does not exist.
+  ansible.builtin.file:
+    path: /usr/local/src/gpg_keys
+    state: directory
+    mode: '0755'
+  become: true
+
+- name: Download k8s's gpg key.
+  register: get_k8s_gpg_key
+  ansible.builtin.get_url:
+    url: "https://pkgs.k8s.io/core:/stable:/v{{ k8s_version }}/deb/Release.key"
+    dest: /usr/local/src/gpg_keys/k8s.gpg.key
+    force: true
+  become: true
+
+- name: Create keyrings directory if it does not exist.
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+  become: true
+
+- name: Check stat kubernetes-archive-keyring.gpg
+  register: stat_k8s_gpg
+  ansible.builtin.stat:
+    path: /etc/apt/keyrings/kubernetes-archive-keyring.gpg
+
+- name: Encode from docker gpg key to binary.
+  ansible.builtin.command:
+    cmd: gpg -o /etc/apt/keyrings/kubernetes-archive-keyring.gpg --dearmor /usr/local/src/gpg_keys/k8s.gpg.key
+  become: true
+  when: not stat_k8s_gpg.stat.exists and get_k8s_gpg_key.changed
+
+- name: Add repository for kubernetes.
+  ansible.builtin.apt_repository:
+    repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-archive-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v{{ k8s_version }}/deb/ /"
+    filename: kubernetes
+    update_cache: true
+    state: present
+  become: true
+
+- name: Install kubernetes' packages.
+  ansible.builtin.apt:
+    name:
+      - kubelet
+      - kubeadm
+      - kubectl
+    update_cache: false
+  become: true
+
+- name: Prevent k8s' packages from being upgraded
+  ansible.builtin.dpkg_selections:
+    name: "{{ item }}"
+    selection: hold
+  become: true
+  loop:
+    - kubelet
+    - kubeadm
+    - kubectl
+
+- name: Start and enabled kubelet.service.
+  ansible.builtin.systemd:
+    name: kubelet.service
+    state: started
+    daemon_reload: true
+    enabled: true
+  become: true

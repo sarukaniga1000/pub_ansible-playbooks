@@ -1,0 +1,30 @@
+---
+- name: Enable ipv4 forwarding.
+  ansible.builtin.import_tasks: ip_forwarding.yml
+  tags:
+    - ip_forward
+    - main
+
+- name: Disable swap memory.
+  ansible.builtin.import_tasks: disable_swap.yml
+  tags:
+    - disable_swap
+    - main
+
+- name: Install kubernetes.
+  ansible.builtin.import_tasks: install_k8s.yml
+  tags:
+    - install_k8s
+    - main
+
+- name: Install cri-o.
+  ansible.builtin.import_tasks: install_cri-o.yml
+  tags:
+    - install_crio
+    - main
+
+- name: Install python kubernetes library.
+  ansible.builtin.import_tasks: install_python_library.yml
+  tags:
+    - install_py_lib
+    - main

@@ -1,0 +1,5 @@
+---
+- hosts:
+    - k8s
+  roles:
+    - k8s_gitea

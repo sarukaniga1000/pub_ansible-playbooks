@@ -1,0 +1,25 @@
+---
+- name: Check joined this node.
+  register: check_present_node_list
+  ansible.builtin.shell:
+    cmd: set -o pipefail && kubectl get node | awk '{print $1}'
+    executable: /bin/bash
+  delegate_to: "{{ groups['k8s_master'][0] }}"
+  changed_when: false
+  check_mode: false
+
+- name: Generate token and join new control plain.
+  when: os_hostname not in check_present_node_list.stdout
+  block:
+    - name: Generate new token.
+      register: generate_token
+      ansible.builtin.command:
+        cmd: kubeadm token create --print-join-command
+      delegate_to: "{{ groups['k8s_master'][0] }}"
+      changed_when: false
+
+    - name: Join to control plain.
+      ansible.builtin.command:
+        cmd: "{{ generate_token.stdout }} --control-plane"
+      become: true
+      when: not ansible_check_mode

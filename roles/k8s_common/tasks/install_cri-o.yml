@@ -1,0 +1,111 @@
+---
+- name: Create gpg_keys directory if it does not exist.
+  ansible.builtin.file:
+    path: /usr/local/src/gpg_keys
+    state: directory
+    mode: '0755'
+  become: true
+
+# https://github.com/cri-o/cri-o/blob/main/install.md#apt-based-operating-systems
+# - name: Download libcontainers gpg key.
+#   register: get_libcontainers_gpg_key
+#   ansible.builtin.get_url:
+#     url: "https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_{{ ansible_distribution_version }}/Release.key"
+#     dest: /usr/local/src/gpg_keys/libcontainers.gpg.key
+#     force: true
+#   become: true
+
+# - name: Check stat libcontainers-archive-keyring.gpg
+#   register: stat_libcontainers_gpg
+#   ansible.builtin.stat:
+#     path: /etc/apt/keyrings/libcontainers-archive-keyring.gpg
+
+# - name: Encode from libcontainers gpg key to binary.
+#   ansible.builtin.command:
+#     cmd: gpg -o /etc/apt/keyrings/libcontainers-archive-keyring.gpg --dearmor /usr/local/src/gpg_keys/libcontainers.gpg.key
+#   become: true
+#   when: not stat_libcontainers_gpg.stat.exists and get_libcontainers_gpg_key is changed
+
+# - name: Add repository for libcontainers.
+#   ansible.builtin.apt_repository:
+#     repo: "deb [signed-by=/etc/apt/keyrings/libcontainers-archive-keyring.gpg] https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_{{ ansible_distribution_version }}/ /"
+#     filename: devel:kubic:libcontainers:stable
+#     update_cache: false
+#     state: present
+#   become: true
+
+# # https://github.com/cri-o/cri-o/blob/main/install.md#apt-based-operating-systems
+# - name: Download libcontainers-crio gpg key.
+#   register: get_libcontainers_crio_gpg_key
+#   ansible.builtin.get_url:
+#     url: "https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable:/cri-o:/{{ crio_version }}/xUbuntu_{{ ansible_distribution_version }}/Release.key"
+#     dest: /usr/local/src/gpg_keys/libcontainers-crio.gpg.key
+#     force: true
+#   become: true
+
+# - name: Check stat libcontainers-crio-archive-keyring.gpg
+#   register: stat_libcontainers_crio_gpg
+#   ansible.builtin.stat:
+#     path: /etc/apt/keyrings/libcontainers-crio-archive-keyring.gpg
+
+# - name: Encode from libcontainers-crio gpg key to binary.
+#   ansible.builtin.command:
+#     cmd: gpg -o /etc/apt/keyrings/libcontainers-crio-archive-keyring.gpg --dearmor /usr/local/src/gpg_keys/libcontainers-crio.gpg.key
+#   become: true
+#   when: not stat_libcontainers_crio_gpg.stat.exists and get_libcontainers_crio_gpg_key is changed
+
+# - name: Add repository for libcontainers.
+#   ansible.builtin.apt_repository:
+#     repo: "deb [signed-by=/etc/apt/keyrings/libcontainers-crio-archive-keyring.gpg] https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable:/cri-o:/{{ crio_version }}/xUbuntu_{{ ansible_distribution_version }} /"
+#     filename: "devel:kubic:libcontainers:stable:cri-o:{{ crio_version }}"
+#     update_cache: true
+#     state: present
+#   become: true
+
+# https://github.com/cri-o/cri-o/blob/main/install.md#apt-based-operating-systems
+- name: Download CRI-O gpg key.
+  register: get_crio_gpg_key
+  ansible.builtin.get_url:
+    url: "https://pkgs.k8s.io/addons:/cri-o:/prerelease:/main/deb/Release.key"
+    dest: /usr/local/src/gpg_keys/cri-o-apt-keyring.gpg.key
+    force: true
+  become: true
+
+- name: Check stat cri-o-apt-keyring.gpg
+  register: stat_cri_o_apt_keyring_gpg
+  ansible.builtin.stat:
+    path: /etc/apt/keyrings/cri-o-apt-keyring.gpg
+
+- name: Encode from CRI-O gpg key to binary.
+  ansible.builtin.command:
+    cmd: gpg -o /etc/apt/keyrings/cri-o-apt-keyring.gpg --dearmor /usr/local/src/gpg_keys/cri-o-apt-keyring.gpg.key
+  become: true
+  when: not stat_cri_o_apt_keyring_gpg.stat.exists and get_crio_gpg_key.changed
+
+- name: Add repository for CRI-O.
+  ansible.builtin.apt_repository:
+    repo: "deb [signed-by=/etc/apt/keyrings/cri-o-apt-keyring.gpg] https://pkgs.k8s.io/addons:/cri-o:/prerelease:/main/deb/ /"
+    filename: cri-o
+    update_cache: true
+    state: present
+  become: true
+
+- name: Install cri-o.
+  ansible.builtin.apt:
+    name: cri-o
+    update_cache: false
+  become: true
+
+- name: Remove initialize cni.
+  ansible.builtin.file:
+    path: /etc/cni/net.d/*
+    state: absent
+  become: true
+
+- name: Start and enabled crio.service.
+  ansible.builtin.systemd:
+    name: crio.service
+    state: started
+    enabled: true
+    daemon_reload: true
+  become: true

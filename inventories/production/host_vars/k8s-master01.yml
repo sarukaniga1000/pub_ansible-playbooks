@@ -1,0 +1,5 @@
+---
+os_address_ipv4: 192.168.100.101
+os_hostname: 'k8s-master01'
+
+k8s_master_init: true

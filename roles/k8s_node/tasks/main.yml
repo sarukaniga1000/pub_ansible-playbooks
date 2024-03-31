@@ -1,0 +1,7 @@
+---
+- name: Join master's cluster.
+  ansible.builtin.import_tasks: join_master.yml
+  tags:
+    - join
+    - main
+  when: not k8s_master_init and k8s_master_init is defined

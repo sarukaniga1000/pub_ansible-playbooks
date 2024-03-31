@@ -1,0 +1,12 @@
+# ansible 実行ホスト ~/.ssh/config にSSH 接続先ホストの情報の記載が必要
+[k8s_master]
+k8s-master01 ansible_ssh_host=__k8s-master01
+k8s-master02 ansible_ssh_host=__k8s-master02
+k8s-master03 ansible_ssh_host=__k8s-master03
+
+[k8s_node]
+k8s-node01 ansible_ssh_host=__k8s-node01
+k8s-node02 ansible_ssh_host=__k8s-node02
+
+[k8s_lb]
+k8s-lb01 ansible_ssh_host=__k8s-lb01

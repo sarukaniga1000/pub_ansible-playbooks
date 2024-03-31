@@ -1,0 +1,16 @@
+---
+# kubernetes address info
+k8s_load_balance_address: 192.168.100.100
+k8s_control_plain_address:
+  - 192.168.100.101
+  - 192.168.100.102
+  - 192.168.100.103
+k8s_node_address:
+  - 192.168.100.111
+  - 192.168.100.112
+k8s_pod_network: 10.244.0.0/16
+
+# version info
+crio_version: 1.30
+calico_version: 3.27.2
+k8s_version: 1.29

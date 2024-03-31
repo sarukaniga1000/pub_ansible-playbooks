@@ -1,0 +1,42 @@
+---
+- name: Check stat config if copied k8s's admin.conf on user's home directory.
+  register: stat_k8s_auth_conf
+  ansible.builtin.stat:
+    path: "{{ ansible_user_dir }}/.kube/config"
+
+- name: Setup master cluster init command.
+  register: init_master_cluster
+  ansible.builtin.command:
+    cmd: "kubeadm init --apiserver-advertise-address={{ os_address_ipv4 }} --pod-network-cidr={{ k8s_pod_network }} --upload-certs"
+  become: true
+  when: not stat_k8s_auth_conf.stat.exists
+
+- name: Create .k8s_work directory on user's home if it does not exist.
+  ansible.builtin.file:
+    path: "{{ ansible_user_dir }}/.k8s_work"
+    state: directory
+    mode: '0755'
+
+- name: Copy k8s setup command.
+  ansible.builtin.copy:
+    content: "{{ init_master_cluster.stdout }}"
+    dest: "{{ ansible_user_dir }}/.k8s_work/setup_cluster.txt"
+    mode: '0644'
+  when: init_master_cluster is changed
+
+- name: Create .kube directory on user's home if it does not exist.
+  ansible.builtin.file:
+    path: "{{ ansible_user_dir }}/.kube"
+    state: directory
+    mode: '0755'
+
+- name: Copy k8s admin.conf on user's home.
+  ansible.builtin.copy:
+    src: /etc/kubernetes/admin.conf
+    dest: "{{ ansible_user_dir }}/.kube/config"
+    mode: '0600'
+    owner: "{{ ansible_user_uid }}"
+    group: "{{ ansible_user_gid }}"
+    remote_src: true
+  when: not stat_k8s_auth_conf.stat.exists
+  become: true

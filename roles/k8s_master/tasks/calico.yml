@@ -1,0 +1,22 @@
+---
+- name: Create .k8s_work directory on home directory.
+  ansible.builtin.file:
+    path: "{{ ansible_user_dir }}/.k8s_work"
+    state: directory
+    mode: '0755'
+
+# https://docs.tigera.io/calico/latest/getting-started/kubernetes/quickstart
+- name: Download calico manifest to virtual network (container to container).
+  ansible.builtin.get_url:
+    url: "https://raw.githubusercontent.com/projectcalico/calico/v{{ calico_version }}/manifests/tigera-operator.yaml"
+    dest: "{{ ansible_user_dir }}/.k8s_work/tigera-operator.yaml"
+    mode: '0644'
+  notify: Deploy Tigera Calico operator and CRD.
+
+# https://raw.githubusercontent.com/projectcalico/calico/v{{ calico_version }}/manifests/custom-resources.yaml
+- name: Copy custom resources (YAML).
+  ansible.builtin.template:
+    src: home/user01/.k8s_work/custom-resources.yaml.j2
+    dest: "{{ ansible_user_dir }}/.k8s_work/custom-resources.yaml"
+    mode: '0644'
+  notify: Deploy Calico custom resources.

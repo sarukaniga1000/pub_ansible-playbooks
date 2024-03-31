@@ -1,0 +1,10 @@
+---
+- name: Deploy Tigera Calico operator and CRD.
+  ansible.builtin.command: 
+    cmd: kubectl create -f tigera-operator.yaml
+    chdir: "{{ ansible_user_dir }}/.k8s_work"
+
+- name: Deploy Calico custom resources.
+  ansible.builtin.command:
+    cmd: kubectl create -f custom-resources.yaml
+    chdir: "{{ ansible_user_dir }}/.k8s_work"

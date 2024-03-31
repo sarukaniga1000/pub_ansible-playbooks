@@ -1,0 +1,29 @@
+---
+- name: Create a k8s namespace of gitea.
+  kubernetes.core.k8s:
+    name: gitea
+    api_version: v1
+    kind: Namespace
+    state: present
+
+- name: Add gitea chart repo
+  register: add_gitea_chart_repo
+  kubernetes.core.helm_repository:
+    name: gitea-charts
+    repo_url: "https://dl.gitea.io/charts/"
+
+- name: Deploy latest version of gitea chart.
+  register: deploy_gitea_chart
+  kubernetes.core.helm:
+    release_name: gitea
+    release_state: present
+    chart_ref: gitea-charts/gitea
+    chart_version: "{{ gitea_version }}"
+    release_namespace: gitea
+    create_namespace: false
+    update_repo_cache: "{{ add_gitea_chart_repo.changed }}"
+    release_values: "{{ lookup('template', 'helm/gitea_helm_config_value.yaml.j2') | from_yaml }}"
+
+- name: debug
+  ansible.builtin.debug:
+    msg: "{{ deploy_gitea_chart }}"

@@ -1,0 +1,26 @@
+---
+- name: Setup master's cluster.
+  ansible.builtin.import_tasks: master_cluster_init.yml
+  tags:
+    - master_init
+  when: k8s_master_init and k8s_master_init is defined
+
+- name: Install Calico.
+  ansible.builtin.import_tasks: calico.yml
+  tags:
+    - main
+    - calico
+  when: k8s_master_init and k8s_master_init is defined
+
+- name: Install helm.
+  ansible.builtin.import_tasks: install_helm.yml
+  tags:
+    - helm
+    - main
+
+- name: Join master's cluster.
+  ansible.builtin.import_tasks: join_master.yml
+  tags:
+    - join
+    - main
+  when: not k8s_master_init and k8s_master_init is defined
