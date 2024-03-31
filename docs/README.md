@@ -31,6 +31,7 @@ OSインストール後に各ホストの役割に応じて、`k8s_master.yml`,`
 
 - 変数の設定は以下の通り
     - `inventories/production` 配下で定義
+
     | 変数名 | 意味 |
     | --- | --- |
     | crio_version | CRI-O のバージョン |
