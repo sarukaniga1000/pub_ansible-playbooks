@@ -42,6 +42,6 @@ OSインストール後に各ホストの役割に応じて、`k8s_master.yml`,`
 # その他
 環境に応じたPV,PVC の設定が事前に必要
 - AWX 構築
-    - playbook: [awx.yml](awx.yml)
+    - playbook: [awx.yml](../awx.yml)
 - Gitea 構築
-    - playbook: [gitea.yml](gitea.yml)
+    - playbook: [gitea.yml](../gitea.yml)
