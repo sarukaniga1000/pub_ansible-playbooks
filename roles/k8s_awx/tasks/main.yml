@@ -1,0 +1,31 @@
+---
+- name: Create ~/work/repos directory if they don't exist.
+  ansible.builtin.file:
+    path: "{{ ansible_user_dir }}/work/repos"
+    state: directory
+    mode: '0755'
+
+- name: Git clone and checkout.
+  ansible.builtin.git:
+    repo: 'https://github.com/ansible/awx-operator.git'
+    dest: "{{ ansible_user_dir }}/work/repos"
+    version: "{{ awx_version }}"
+
+- name: Deploy AWX Operator.
+  community.general.make:
+    chdir: "{{ ansible_user_dir }}/work/repos/awx-operator"
+    target: deploy
+  environment:
+    NAMESPACE: "{{ awx_namespace }}"
+
+- name: Set AWX namespace to context.
+  kubernetes.core.k8s:
+    context: ''
+    namespace: "{{ awx_namespace }}"
+
+- name: Create configmap using server side apply
+  kubernetes.core.k8s:
+    namespace: "{{ awx_namespace }}"
+    definition: "{{ lookup('template', 'ansible-awx.yml.j2') | from_yaml }}"
+    apply: true
+    state: present

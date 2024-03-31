@@ -1,5 +1,5 @@
 ---
 - hosts:
-    - k8s
+    - k8s_master
   roles:
     - k8s_gitea

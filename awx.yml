@@ -1,0 +1,5 @@
+---
+- hosts:
+    - k8s_master
+  roles:
+    - k8s_awx
