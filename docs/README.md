@@ -5,7 +5,7 @@ Ubuntu 22.04 でControl Plain/Node の準備と構築を行う
 ## 前提条件
 - OS(Ubuntu 22.04) がインストール済みであること
 - Ansible 実行ホストから各ホストへSSH できること
-
+- 注意) Control Plain 1台, Node 2台 の構成で検証しており、LB を挟んだControl Plain 複数台の構成は検証途中
 ## 概要
 
 ### role
@@ -16,7 +16,7 @@ Ubuntu 22.04 でControl Plain/Node の準備と構築を行う
 | k8s_master | Control Plain でのみで必要な設定を行う |
 | k8s_node | Node でのみ必要な設定を行う |
 
-OSインストール後に各ホストの役割に応じて、`k8s_master.yml`,`k8s_node.yml` を実行することで、k8s クラスタが構築可能(Control Plain 1台, Node 2台 の構成で検証)
+OSインストール後に各ホストの役割に応じて、`k8s_master.yml`,`k8s_node.yml` を実行することで、k8s クラスタが構築可能
 
 - 例
     ```shell
