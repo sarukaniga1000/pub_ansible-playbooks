@@ -20,7 +20,7 @@ OSインストール後に各ホストの役割に応じて、`k8s_master.yml`,`
 
 - 例
     ```shell
-    $ ansible-playbook -i inventories/production/hosts k8s_master.yml -K
+    $ ansible-playbook -i inventories/production/hosts k8s_master.yml -l ${hostname} -K
     ```
 
 ### inventory
